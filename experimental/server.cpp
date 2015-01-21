@@ -113,10 +113,11 @@ void readTCP (int sock)
    if(strcmp(buffer, (char *)"echo\n")==0) n = write(sock, buffer, strlen(buffer));
    if(strcmp(buffer, (char *)"aAddr\n")==0) n = write(sock, serialport, strlen(serialport));
    if(strcmp(buffer, (char *)"getPos\n")==0) {
-   		//bzero(buffer, 256);
-		//readArduinoSerial(&buffer);
-		char * testMessage = (char *)"aExt(34.54) aRot(55.03) hPos(05.00) vPos(18.25)";
-   		n = write(sock, testMessage, strlen(testMessage));
+	    local::serialport_write(ardfd, buffer);
+   		bzero(buffer, 256);
+		readArduinoSerial(&buffer);
+		//char * testMessage = (char *)"aExt(34.54) aRot(55.03) hPos(05.00) vPos(18.25)";
+   		n = write(sock, buffer, strlen(buffer));
    }
    
    //n = write(sock,"I got your message",18);
