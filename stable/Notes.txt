@@ -1,0 +1,28 @@
+Notes / to do:
+
+Behaviour now:
+--------------------------------
+server sets up
+server listens
+
+client connects
+client sends message
+
+server recieves message
+server communicates to arduino
+Arduino acts
+server acknowledges client
+
+client disconnects
+
+server keeps listening
+
+server dies a little inside.
+(GOTO 7)
+
+-----------------------------------
+
+TO do:
+GUI for client that sends the signals
+see if client can stay alive as well
+Arrays with commands and responses for arduino/server
