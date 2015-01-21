@@ -32,7 +32,7 @@ void exit_program(int message){
 void error(const char *msg)
 {
     perror(msg);
-    exit_program(1);
+    //exit_program(1);
 }
 
 void initArduinoSerial(){
