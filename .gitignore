@@ -1,3 +1,10 @@
+#ignore compiled stuff
+*.o
+*.out
+
+#ignore backup files from gedit
+*~
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
