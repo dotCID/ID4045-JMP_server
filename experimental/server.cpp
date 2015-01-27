@@ -137,7 +137,11 @@ void readTCP (int sock)
    n = read(sock,buffer,255);
    if (n < 0) error("ERROR reading from socket");
    printf("Received message: %s\n",buffer);
+   local::serialport_flush(ardfd);
    if(ardfd>0) local::serialport_write(ardfd, buffer);
+   bzero(buffer, 256);
+   readArduinoSerial(buffer);
+   printf("Response: %s", buffer);
    
    if(strcmp(buffer, (char *)"echo\n")==0) n = write(sock, buffer, strlen(buffer));
    if(strcmp(buffer, (char *)"aAddr\n")==0) n = write(sock, serialport, strlen(serialport));
