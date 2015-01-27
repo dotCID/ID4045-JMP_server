@@ -2,7 +2,7 @@
    http://www.linuxhowtos.org/C_C++/socket.htm
    and the Arduino Serial library
    
-   MCW - 19/01/2015
+   MCW - 26/01/2015
 */
 #include <stdio.h>
 #include <unistd.h>
@@ -11,7 +11,7 @@
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
-namespace local{
+namespace local{ 					// to make the calling of these functions easier
 #include <arduino-serial-lib.c>
 }
 #include <cstring>
@@ -21,7 +21,12 @@ bool alive = true;
 const char* serialport = "/dev/ttyACM0";
 void readTCP(int);
 
-void exit_program(int message){
+/*
+	Function to properly close all connections before exiting
+	@return void
+	@param message The error message code provided by the system
+*/
+void exit_program(const char* message){
 	printf("Received Exit call\n");
 	if(ardfd>0) local::serialport_close(ardfd);
 	close(sockfd);
@@ -29,12 +34,21 @@ void exit_program(int message){
 	exit(message);
 }
 
+/*
+	Function to handle errors
+	@return void
+	@param msg The error message code provided by the system
+*/
 void error(const char *msg)
 {
     perror(msg);
-    exit_program(1);
+    exit_program(msg);
 }
 
+/*
+	Initialise the serial connection to the Arduino
+	@return void
+*/
 void initArduinoSerial(){
 	int baud = 9600;
 	ardfd = local::serialport_init(serialport, baud);
@@ -43,10 +57,22 @@ void initArduinoSerial(){
 	local::serialport_flush(ardfd);
 }
 
+/*
+	Read serial messages from the Arduino
+	Disabled to alleviate stress on the Arduino
+	@return void
+	@param buffer The buffer the messages are stored in
+*/
 void readArduinoSerial(char* buffer){
 	//serialport_read_until(ardfd, buffer, "\n", 256, 5000);
 }
 
+/*
+	The main program
+	@return int A status code to return
+	@param argc The amount of commandline arguments
+	@param argv The commandline arguments: [server port](required), [Arduino serial port](optional)
+*/
 int main(int argc, char *argv[])
 {
      int portno, pid;
@@ -75,6 +101,8 @@ int main(int argc, char *argv[])
      listen(sockfd,5);
      printf("Listening to incoming signals.\n");
      clilen = sizeof(cli_addr);
+	 
+	 // Infinite loop to create a new process for each connection, keeps the server alive indefinitely
      while (alive) {
          newsockfd = accept(sockfd, 
                (struct sockaddr *) &cli_addr, &clilen);
@@ -88,16 +116,17 @@ int main(int argc, char *argv[])
              readTCP(newsockfd);
              exit(0);
          }else close(newsockfd);
-     } /* end of while */
+     }
      close(sockfd);
-     return 0; /* we never get here */
+     return 0;
 }
 
-/*****************************************
- There is a separate instance of this function 
- for each connection.  It handles all communication
- once a connnection has been established.
- *****************************************/
+/*
+ Reads the incoming TCP messages and responds if needed. 
+ A separate instance is created by the loop above for each connection.
+ @return void
+ @param sock The socket used for the connection to be read
+ */
 void readTCP (int sock)
 {
    int n;
@@ -114,7 +143,7 @@ void readTCP (int sock)
    if(strcmp(buffer, (char *)"aAddr\n")==0) n = write(sock, serialport, strlen(serialport));
    if(strcmp(buffer, (char *)"getPos\n")==0) {
    		//bzero(buffer, 256);
-		//readArduinoSerial(&buffer);
+		//readArduinoSerial(&buffer);	// since reading the serial is currently disabled, this is commented out.
 		char * testMessage = (char *)"aExt(34.54) aRot(55.03) hPos(05.00) vPos(18.25)";
    		n = write(sock, testMessage, strlen(testMessage));
    }
